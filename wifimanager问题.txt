@@ -1,0 +1,183 @@
+////////////start////////////
+16:44:48.707 -> 
+16:44:48.812 -> SPIFFS 开启.
+16:44:48.812 -> *WM: [1] AutoConnect 
+16:44:48.915 -> *WM: [2] ESP32 event handler enabled 
+16:44:48.915 -> *WM: [2] Connecting as wifi client... 
+16:44:48.915 -> *WM: [3] STA static IP:
+16:44:48.915 -> *WM: [2] setSTAConfig static ip not set, skipping 
+16:44:48.915 -> *WM: [1] Connecting to SAVED AP: origincell-auto
+16:44:48.915 -> *WM: [3] Using Password: origincell
+16:44:48.915 -> *WM: [3] WiFi station enable 
+16:44:48.915 -> *WM: [1] connectTimeout not set, ESP waitForConnectResult... 
+16:44:49.977 -> *WM: [2] Connection result: WL_CONNECTED
+16:44:49.977 -> *WM: [3] lastconxresult: WL_CONNECTED
+16:44:49.977 -> *WM: [1] AutoConnect: SUCCESS 
+16:44:49.977 -> *WM: [1] STA IP Address: 192.168.3.100
+16:44:49.977 -> HTTP server started
+16:44:49.977 -> 
+16:45:18.994 -> *WM: [1] resetSettings 
+16:45:18.994 -> *WM: [3] WiFi station enable 
+16:45:19.061 -> *WM: [1] SETTINGS ERASED 
+16:45:19.061 -> WiFi Settings Cleared
+16:45:19.096 -> ets Jun  8 2016 00:22:57
+16:45:19.096 -> 
+16:45:19.096 -> rst:0xc (SW_CPU_RESET),boot:0x1b (SPI_FAST_FLASH_BOOT)
+16:45:19.096 -> configsip: 0, SPIWP:0xee
+16:45:19.096 -> clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+16:45:19.096 -> mode:DIO, clock div:1
+16:45:19.096 -> load:0x3fff0018,len:4
+16:45:19.096 -> load:0x3fff001c,len:1216
+16:45:19.096 -> ho 0 tail 12 room 4
+16:45:19.096 -> load:0x40078000,len:9720
+16:45:19.096 -> ho 0 tail 12 room 4
+16:45:19.096 -> load:0x40080400,len:6352
+16:45:19.096 -> entry 0x400806b8
+16:45:20.790 -> 
+16:45:20.790 -> ////////////start////////////
+16:45:20.790 -> 
+16:45:20.891 -> SPIFFS 开启.
+16:45:20.891 -> *WM: [1] AutoConnect 
+16:45:21.029 -> *WM: [2] ESP32 event handler enabled 
+16:45:21.029 -> *WM: [2] Connecting as wifi client... 
+16:45:21.029 -> *WM: [3] STA static IP:
+16:45:21.029 -> *WM: [2] setSTAConfig static ip not set, skipping 
+16:45:21.029 -> *WM: [1] No wifi save required, skipping 
+16:45:21.029 -> *WM: [2] Connection result: WL_NO_SSID_AVAIL
+16:45:21.029 -> *WM: [3] lastconxresult: WL_NO_SSID_AVAIL
+16:45:21.029 -> *WM: [1] AutoConnect: FAILED 
+16:45:21.029 -> *WM: [2] Starting Config Portal 
+16:45:21.029 -> *WM: [3] WIFI station disconnect 
+16:45:21.029 -> *WM: [3] WiFi station enable 
+16:45:21.029 -> *WM: [2] Disabling STA 
+16:45:21.029 -> *WM: [2] Enabling AP 
+16:45:21.029 -> *WM: [1] StartAP with SSID:  eDray_ID-000
+16:45:21.029 -> *WM: [2] AP has anonymous access! 
+16:45:21.064 -> *WM: [1] SoftAP Configuration 
+16:45:21.064 -> *WM: [1] -------------------- 
+16:45:21.064 -> *WM: [1] ssid:             eDray_ID-000
+16:45:21.064 -> *WM: [1] password:         
+16:45:21.064 -> *WM: [1] ssid_len:         12
+16:45:21.064 -> *WM: [1] channel:          1
+16:45:21.064 -> *WM: [1] authmode:        
+16:45:21.064 -> *WM: [1] ssid_hidden:     
+16:45:21.064 -> *WM: [1] max_connection:   4
+16:45:21.064 -> *WM: [1] country:          CN
+16:45:21.064 -> *WM: [1] beacon_interval:  100(ms)
+16:45:21.064 -> *WM: [1] -------------------- 
+16:45:21.579 -> *WM: [1] AP IP address: 192.168.4.1
+16:45:21.579 -> *WM: [3] setupConfigPortal 
+16:45:21.579 -> *WM: [1] Starting Web Portal 
+16:45:21.579 -> *WM: [3] dns server started with ip:  192.168.4.1
+16:45:21.579 -> *WM: [2] HTTP server started 
+16:45:23.883 -> *WM: [2] WiFi Scan ASYNC completed in 2305 ms
+16:45:23.883 -> *WM: [2] WiFi Scan ASYNC found: 18
+16:45:23.883 -> *WM: [2] WiFi Scan completed in 2305 ms
+16:45:23.883 -> *WM: [2] Config Portal Running, blocking, waiting for clients... 
+16:45:32.062 -> *WM: [3] -> dnet.mb.qq.com 
+16:45:32.062 -> *WM: [2] <- Request redirected to captive portal 
+16:45:33.822 -> *WM: [3] -> extshort.weixin.qq.com 
+16:45:33.822 -> *WM: [2] <- Request redirected to captive portal 
+16:45:33.890 -> *WM: [3] -> szextshort.weixin.qq.com 
+16:45:33.890 -> *WM: [2] <- Request redirected to captive portal 
+16:45:33.924 -> *WM: [3] -> szextshort.weixin.qq.com 
+16:45:33.924 -> *WM: [2] <- Request redirected to captive portal 
+16:45:33.993 -> *WM: [3] -> szextshort.weixin.qq.com 
+16:45:33.993 -> *WM: [2] <- Request redirected to captive portal 
+16:45:35.883 -> *WM: [3] -> extshort.weixin.qq.com 
+16:45:35.883 -> *WM: [2] <- Request redirected to captive portal 
+16:45:35.918 -> *WM: [3] -> szextshort.weixin.qq.com 
+16:45:35.918 -> *WM: [2] <- Request redirected to captive portal 
+16:45:35.918 -> *WM: [3] -> szextshort.weixin.qq.com 
+16:45:35.918 -> *WM: [2] <- Request redirected to captive portal 
+16:45:36.088 -> *WM: [3] -> tools.3g.qq.com 
+16:45:36.088 -> *WM: [2] <- Request redirected to captive portal 
+16:45:36.123 -> *WM: [3] -> szextshort.weixin.qq.com 
+16:45:36.123 -> *WM: [2] <- Request redirected to captive portal 
+16:45:36.123 -> *WM: [3] -> tools.3g.qq.com 
+16:45:36.123 -> *WM: [2] <- Request redirected to captive portal 
+16:45:36.816 -> *WM: [3] -> tools.3g.qq.com 
+16:45:36.816 -> *WM: [2] <- Request redirected to captive portal 
+16:45:37.230 -> *WM: [3] -> extshort.weixin.qq.com 
+16:45:37.230 -> *WM: [2] <- Request redirected to captive portal 
+16:45:37.472 -> *WM: [2] <- HTTP Root 
+16:45:37.472 -> *WM: [3] -> 192.168.4.1 
+16:45:37.472 -> *WM: [3] lastconxresulttmp: WL_IDLE_STATUS
+16:45:37.472 -> *WM: [3] lastconxresult: WL_DISCONNECTED
+16:45:37.472 -> *WM: [2] Scan is cached 13591 ms ago
+16:45:40.538 -> *WM: [2] <- HTTP Wifi 
+16:45:40.538 -> *WM: [2] Scan is cached 16641 ms ago
+16:45:40.538 -> *WM: [1] 18 networks found
+16:45:40.538 -> *WM: [2] DUP AP: origincell-guest
+16:45:40.538 -> *WM: [2] DUP AP: origincell-guest
+16:45:40.538 -> *WM: [2] DUP AP: origincell-guest
+16:45:40.538 -> *WM: [2] DUP AP: origincell-guest
+16:45:40.538 -> *WM: [2] DUP AP: origincell-guest
+16:45:40.538 -> *WM: [2] DUP AP: origincell-guest
+16:45:40.538 -> *WM: [2] DUP AP: origincell-pubilc
+16:45:40.538 -> *WM: [2] DUP AP: origincell-pubilc
+16:45:40.538 -> *WM: [2] DUP AP: origincell-pubilc
+16:45:40.538 -> *WM: [2] DUP AP: origincell-pubilc
+16:45:40.538 -> *WM: [2] DUP AP: origincell-pubilc
+16:45:40.538 -> *WM: [2] DUP AP: origincell-pubilc
+16:45:40.572 -> *WM: [2] DUP AP: origincell-pubilc
+16:45:40.572 -> *WM: [2] AP:  -40 origincell-auto
+16:45:40.572 -> *WM: [2] AP:  -53 origincell-guest
+16:45:40.572 -> *WM: [2] AP:  -53 origincell-pubilc
+16:45:40.572 -> *WM: [2] AP:  -89 TP-LINK_A8DF3B
+16:45:40.572 -> *WM: [2] AP:  -92 Mi 10
+16:45:40.572 -> *WM: [3] lastconxresulttmp: WL_IDLE_STATUS
+16:45:40.572 -> *WM: [3] lastconxresult: WL_DISCONNECTED
+16:45:40.572 -> *WM: [3] Sent config page 
+16:45:45.596 -> *WM: [3] -> extshort.weixin.qq.com 
+16:45:45.596 -> *WM: [2] <- Request redirected to captive portal 
+16:45:45.596 -> *WM: [3] -> 3gimg.qq.com  
+16:45:45.596 -> *WM: [2] <- Request redirected to captive portal 
+16:45:46.214 -> *WM: [3] -> tools.3g.qq.com 
+16:45:46.214 -> *WM: [2] <- Request redirected to captive portal 
+16:45:46.249 -> *WM: [2] <- HTTP Root 
+16:45:46.249 -> *WM: [3] -> mazu.3g.qq.com 
+16:45:46.249 -> *WM: [2] <- Request redirected to captive portal 
+16:45:46.284 -> *WM: [2] <- HTTP Root 
+16:45:46.284 -> *WM: [3] -> mazu.3g.qq.com 
+16:45:46.284 -> *WM: [2] <- Request redirected to captive portal 
+16:45:46.592 -> *WM: [2] <- HTTP Root 
+16:45:46.592 -> *WM: [3] -> 192.168.4.1 
+16:45:46.592 -> *WM: [3] lastconxresulttmp: WL_IDLE_STATUS
+16:45:46.592 -> *WM: [3] lastconxresult: WL_DISCONNECTED
+16:45:46.592 -> *WM: [2] Scan is cached 22710 ms ago
+16:45:46.592 -> *WM: [2] <- HTTP Root 
+16:45:46.592 -> *WM: [3] -> 192.168.4.1 
+16:45:46.592 -> *WM: [3] lastconxresulttmp: WL_IDLE_STATUS
+16:45:46.592 -> *WM: [3] lastconxresult: WL_DISCONNECTED
+16:45:46.592 -> *WM: [2] Scan is cached 22729 ms ago
+16:45:46.626 -> *WM: [3] -> tools.3g.qq.com 
+16:45:46.626 -> *WM: [2] <- Request redirected to captive portal 
+16:45:46.626 -> *WM: [3] -> tools.3g.qq.com 
+16:45:46.626 -> *WM: [2] <- Request redirected to captive portal 
+16:45:49.379 -> *WM: [2] NUM CLIENTS: 1 
+16:45:49.928 -> *WM: [2] <- HTTP WiFi save  
+16:45:49.928 -> *WM: [3] Method: POST
+16:45:49.928 -> *WM: [3] Sent wifi save page 
+16:45:49.928 -> *WM: [2] processing save 
+16:45:51.967 -> *WM: [2] Connecting as wifi client... 
+16:45:51.967 -> *WM: [3] STA static IP:
+16:45:51.967 -> *WM: [2] setSTAConfig static ip not set, skipping 
+16:45:51.967 -> *WM: [1] CONNECTED:
+16:45:51.967 -> *WM: [1] Connecting to NEW AP: origincell-auto
+16:45:51.967 -> *WM: [3] Using Password: origincell
+16:45:51.967 -> *WM: [3] WiFi station enable 
+16:45:52.002 -> *WM: [1] connectTimeout not set, ESP waitForConnectResult... 
+16:45:52.519 -> *WM: [2] Connection result: WL_CONNECTED
+16:45:52.519 -> *WM: [3] lastconxresult: WL_CONNECTED
+16:45:52.519 -> *WM: [1] Connect to new AP [SUCCESS] 
+16:45:52.519 -> *WM: [1] Got IP Address: 
+16:45:52.519 -> *WM: [1] 192.168.3.100 
+16:45:52.519 -> *WM: [2] disconnect configportal 
+16:45:53.552 -> *WM: [2] restoring usermode STA
+16:45:53.552 -> *WM: [2] wifi status: WL_CONNECTED
+16:45:53.552 -> *WM: [2] wifi mode: STA
+16:45:53.552 -> *WM: [1] config portal exiting 
+16:45:53.552 -> [ERROR] wm not ready
+16:45:53.552 -> HTTP server started
+16:45:53.552 -> 
