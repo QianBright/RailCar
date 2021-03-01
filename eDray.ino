@@ -1,132 +1,150 @@
-#include <analogWrite.h>
-
-//wifi
 #include <WiFi.h>
-#include <WiFiMulti.h>
-#include <WebServer.h>
-#include <ESPmDNS.h>
-#include <esp_wifi.h>
-#include <WiFiManager.h>
+#include <PubSubClient.h>
+#include <ArduinoJson.h>
 
-//闪存
-#include <FS.h>
-#include <SPIFFS.h>
-
-//led
-#include "ledWifi.h"
-
+// 引脚设置
 #define KEY_IO0 0
-ledWifi LED_WIFI(32);
+#define LED 12
 
-WiFiMulti wifiMulti;
-WiFiManager wifiManager;
-WebServer server(80);
+// 连接WIFI账号和密码
+#define WIFI_SSID         "origincell-auto"
+#define WIFI_PASSWD       "origincell"
+
+
+// 设备的三元组信息
+#define PRODUCT_KEY       "a15DkNAnYul"
+#define DEVICE_NAME       "Moth001"
+#define DEVICE_SECRET     "155f22f3f7b3cea7a9c3d61b9e59b82b"
+#define REGION_ID         "cn-shanghai"
+
+#define CLIENT_ID         "123|securemode=3,signmethod=hmacsha1,timestamp=789|"
+#define MQTT_PASSWD       "9389b234f5435b0f8b031d7f6403ddc73a73e758"
+
+// 线上环境域名和端口号，不需要改
+#define MQTT_SERVER       PRODUCT_KEY ".iot-as-mqtt." REGION_ID ".aliyuncs.com"
+#define MQTT_PORT         1883
+#define MQTT_USRNAME      DEVICE_NAME "&" PRODUCT_KEY
+
+#define ALINK_TOPIC_PROP_POST     "/sys/" PRODUCT_KEY "/" DEVICE_NAME "/thing/event/property/post"
+#define ALINK_TOPIC_PROP_SET     "/sys/" PRODUCT_KEY "/" DEVICE_NAME "/thing/event/property/set"
+
+#define ALINK_BODY_FORMAT         "{\"method\":\"thing.service.property.post\",\"id\":\"123\",\"params\":{},\"version\":\"1.0.0\"}"
+
+bool light = 0;
+unsigned long lastMs = 0;
+
+WiFiClient CClient;
+PubSubClient  client(CClient);
+
+// Wifi连接模块
+void wifiInit() {
+  WiFi.mode(WIFI_AP_STA);
+  WiFi.softAP("eDray", "12345678");
+  Serial.print("WiFi连接中..");
+  WiFi.begin(WIFI_SSID, WIFI_PASSWD);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.print(".");
+  }
+  Serial.println();
+  Serial.println("WiFi连接成功!");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+
+
+
+// 检查与服务器的连接状态 // 断开重连
+void mqttConnect() {
+  while (!client.connected()) {
+    Serial.println("MQTT服务器连接中...");
+    if (client.connect(CLIENT_ID, MQTT_USRNAME, MQTT_PASSWD)) {
+      Serial.println("MQTT连接成功!");
+      // 连接成功时订阅主题
+      client.subscribe(ALINK_TOPIC_PROP_SET); // 订阅
+    } else {
+      Serial.print("MQTT Connect err:");
+      Serial.println(client.state());
+      delay(2000);
+    }
+  }
+}
+
+// PUSH
+void mqttIntervalPost() {
+  DynamicJsonDocument PUSHdoc(512);
+  deserializeJson(PUSHdoc, ALINK_BODY_FORMAT);//从ALINK_BODY_FORMAT解码成DynamicJsonDocument
+  JsonObject root = PUSHdoc.as<JsonObject>(); //从doc对象转换成的JsonObject类型对象
+  JsonObject params = root["params"];
+  params["light"] = digitalRead(KEY_IO0);
+
+  Serial.println("消息内容: ");
+  serializeJsonPretty(PUSHdoc, Serial);// 串口美化打印json
+  Serial.println();
+
+  Serial.printf("JsonDocument已使用内存%d字节\n", PUSHdoc.memoryUsage());
+
+  char jsonBuffer[256];
+  size_t n = serializeJson(PUSHdoc, jsonBuffer);
+  client.publish(ALINK_TOPIC_PROP_POST, jsonBuffer, n);
+
+  Serial.println();
+  Serial.println("-----------PUSH END------------");
+  //  PUSHdoc.clear();
+}
+
+// RECV
+//首先打印主题名称, 然后打印收到的消息的每个字节
+void callback(char *topic, byte *payload, unsigned int length) {
+  Serial.print("Topic: ");
+  Serial.println(topic);
+  DynamicJsonDocument RECVdoc(512);
+  deserializeJson(RECVdoc, payload, length);
+  //  JsonObject root = RECVdoc.as<JsonObject>(); //从doc对象转换成的JsonObject类型对象
+  //  JsonObject params = root["params"];
+  Serial.println("消息内容: ");
+  serializeJsonPretty(RECVdoc, Serial);// 串口美化打印json
+  Serial.println();
+  Serial.printf("JsonDocument已使用内存%d字节\n", RECVdoc.memoryUsage());
+
+  JsonObject root = RECVdoc.as<JsonObject>(); //从doc对象转换成的JsonObject类型对象
+  JsonObject params = root["params"];
+  light = params["light"];
+  //  RECVdoc.clear();
+  Serial.println("-----------RECV END------------");
+}
 
 void setup() {
   Serial.begin(115200);
+  pinMode(KEY_IO0,  INPUT_PULLUP);
+  pinMode(LED, OUTPUT);
   Serial.println();
-  Serial.println("////////////start////////////");
   Serial.println();
+  Serial.println("///////////Start///////////");
 
-  pinMode(KEY_IO0, INPUT_PULLUP);
+  wifiInit(); // 连接WIFI
 
-  // 启动闪存文件系统
-  if (SPIFFS.begin()) {
-    Serial.println("SPIFFS 开启.");
+  // 连接MQTT服务器
+  client.setServer(MQTT_SERVER, MQTT_PORT);
+  client.setCallback(callback); //接受消息
+  mqttConnect();
+  //  mqttIntervalPost(); // 发布
+
+}
+
+void loop() {
+  if (!client.connected()) {
+    mqttConnect();
+  }
+  // 5秒上传一次
+  if (millis() - lastMs >= 5000) {
+    lastMs = millis();
+    mqttIntervalPost(); // 发布
+  }
+  client.loop();
+  if (light == 1) {
+    digitalWrite(LED, HIGH);
   } else {
-    Serial.println("SPIFFS 开启失败.");
+    digitalWrite(LED, LOW);
   }
-
-  wifiManager.autoConnect("eDray_ID-000");
-
-  //初始化网络服务器
-  server.on("/LED-Control", handleLEDControl);
-  server.onNotFound(handleUserRequest); // 处理其它网络请求
-
-  // 启动网站服务
-  server.begin();
-  Serial.println("HTTP server started");
-  Serial.println();
-}
-
-void loop(void) {
-  server.handleClient();  //处理网络请求
-  //Serial.print(".");
-
-  //用于删除已存WiFi
-  if (digitalRead(KEY_IO0) == LOW) {
-    LED_WIFI.flash();
-    delay(1000);
-    wifiManager.resetSettings();
-    Serial.println("WiFi Settings Cleared");
-    delay(10);
-    ESP.restart();  //复位esp32
-  }
-}
-
-//LED
-void handleLEDControl() {
-  // 从浏览器发送的信息中获取PWM控制数值（字符串格式）
-  String ledPwm = server.arg("ledPwm");
-
-  // 将字符串格式的PWM控制数值转换为整数
-  int ledPwmVal = ledPwm.toInt();
-
-  // 实施引脚PWM设置
-  //analogWrite(LED_WIFI, ledPwmVal);
-  LED_WIFI.analog(ledPwmVal);
-
-  server.sendHeader("Location", "/");
-  server.send(303);
-}
-
-// 处理用户浏览器的HTTP访问
-void handleUserRequest() {
-
-  // 获取用户请求资源(Request Resource）
-  String reqResource = server.uri();
-  Serial.print("reqResource: ");
-  Serial.println(reqResource);
-
-  // 通过handleFileRead函数处处理用户请求资源
-  bool fileReadOK = handleFileRead(reqResource);
-
-  // 如果在SPIFFS无法找到用户访问的资源，则回复404 (Not Found)
-  if (!fileReadOK) {
-    server.send(404, "text/plain", "404 Not Found");
-  }
-}
-
-bool handleFileRead(String resource) {            //处理浏览器HTTP访问
-
-  if (resource.endsWith("/")) {                   // 如果访问地址以"/"为结尾
-    resource = "/index.html";                     // 则将访问地址修改为/index.html便于SPIFFS访问
-  }
-
-  String contentType = getContentType(resource);  // 获取文件类型
-
-  if (SPIFFS.exists(resource)) {                     // 如果访问的文件可以在SPIFFS中找到
-    File file = SPIFFS.open(resource, "r");          // 则尝试打开该文件
-    server.streamFile(file, contentType);// 并且将该文件返回给浏览器
-    file.close();                                // 并且关闭文件
-    return true;                                 // 返回true
-  }
-  return false;                                  // 如果文件未找到，则返回false
-}
-
-// 获取文件类型
-String getContentType(String filename) {
-  if (filename.endsWith(".htm")) return "text/html";
-  else if (filename.endsWith(".html")) return "text/html";
-  else if (filename.endsWith(".css")) return "text/css";
-  else if (filename.endsWith(".js")) return "application/javascript";
-  else if (filename.endsWith(".png")) return "image/png";
-  else if (filename.endsWith(".gif")) return "image/gif";
-  else if (filename.endsWith(".jpg")) return "image/jpeg";
-  else if (filename.endsWith(".ico")) return "image/x-icon";
-  else if (filename.endsWith(".xml")) return "text/xml";
-  else if (filename.endsWith(".pdf")) return "application/x-pdf";
-  else if (filename.endsWith(".zip")) return "application/x-zip";
-  else if (filename.endsWith(".gz")) return "application/x-gzip";
-  return "text/plain";
 }

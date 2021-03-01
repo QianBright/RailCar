@@ -16,9 +16,9 @@
 
 #if defined(ESP8266) || defined(ESP32)
 
-#ifdef ESP8266
-#include <core_version.h>
-#endif
+	#ifdef ESP8266
+	#include <core_version.h>
+	#endif
 
 #include <vector>
 
@@ -142,8 +142,7 @@ class WiFiManagerParameter {
 };
 
 
-class WiFiManager
-{
+class WiFiManager{
   public:
     WiFiManager(Stream& consolePort);
     WiFiManager();
@@ -151,14 +150,17 @@ class WiFiManager
     void WiFiManagerInit();
 
     // auto connect to saved wifi, or custom, and start config portal on failures
+	// 自动连接到保存的wifi，或自定义，并在故障时启动配置门户
     boolean       autoConnect();
     boolean       autoConnect(char const *apName, char const *apPassword = NULL);
 
     //manually start the config portal, autoconnect does this automatically on connect failure
+	//手动启动配置门户，autoconnect在连接失败时自动执行此操作
     boolean       startConfigPortal(); // auto generates apname
     boolean       startConfigPortal(char const *apName, char const *apPassword = NULL);
 
     //manually stop the config portal if started manually, stop immediatly if non blocking, flag abort if blocking
+	//如果是手动启动的，请手动停止config portal，如果不是阻塞则立即停止，如果阻塞则标记abort
     bool          stopConfigPortal();
     
     //manually start the web portal, autoconnect does this automatically on connect failure    
@@ -321,12 +323,14 @@ class WiFiManager
     String        getModeString(uint8_t mode);
 
     // check if the module has a saved ap to connect to
+	//检查模块是否有保存的ap要连接
     bool          getWiFiIsSaved();
 
-    // helper to get saved ssid, if persistent get stored, else get current if connected
+    // helper to get saved , if persistent get stored, else get current if connected
+	//helper获取保存的密码，如果是持久化的就存储，如果连接了就获取当前的
     String        getWiFiPass(bool persistent = false);
 
-    // helper to get saved password, if persistent get stored, else get current if connected
+    // helper to get saved ssid, if persistent get stored, else get current if connected
     String        getWiFiSSID(bool persistent = false);
 
     // debug output the softap config
@@ -455,8 +459,9 @@ class WiFiManager
     String        _wificountry            = "";  // country code, @todo define in strings lang
 
     // wrapper functions for handling setting and unsetting persistent for now.
+	//包装器函数，用于处理持久性设置和取消持久性设置。
     bool          esp32persistent         = false;
-    bool          _hasBegun               = false; // flag wm loaded,unloaded
+    bool          _hasBegun               = false; // flag wm loaded,unloaded //wm加载、卸载
     void          _begin();
     void          _end();
 

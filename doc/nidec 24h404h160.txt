@@ -1,0 +1,53 @@
+Product Description
+
+Product specification classification:
+ 
+24H404H070 (spiral shaft 6MM)
+A42B202O4A
+24H404H160 (optical axis 6MM)
+Pin definition:
+ 
+Red: [12V positive pole] motor drive power positive DC9V-12V
+红：电源 DC9V-12V 标准12V
+Black: [power negative] power supply negative
+黑：地线
+Yellow: [Emergency stop] brake, short power supply negative brake
+黄：急停，制动。
+White: [PWM speed regulation] external PWM signal speed regulation, the lowest frequency is 330HZ, recommended 20-30KHZ
+白：PWM信号，20-30KHZ
+Green: [Positive reversal] positive and negative control, low level reversal
+绿：正反转，低电平反转
+Blue: [empty foot]
+Brown [speed signal output] output square wave signal, change with the change of speed
+棕：速度输出。输出方波信号
+Orange: [empty foot]
+
+DC12V, the maximum no-load speed is 4800 rpm, the no-load current is 180 mA, and the resistance is applied during operation. 
+The current can rise to about 2a.
+DC12V，空转速度4800rpm，空载电流180mA。带负载最大2A
+
+Original Japanese nidec brushless motor, the tail connector is connected, 
+you need to have a one-yuan dollar with an 8-core cable,
+you need more than one yuan for the cable.
+
+Motor built-in drive circuit, patch mos tube independent drive, 
+non-chip direct drive small power motor, external wiring is easy to achieve positive and negative, 
+emergency stop, pmw speed, and brushless motor torque is much better than brush And very quiet. 
+
+When the 4mm motor shaft is running, it is almost pinchless. It is not ruled out that the good comrades can pinch.
+
+The pmw speed of the motor is very good, 
+the minimum test of the owner can be less than one second, 
+and the following figure provides the speed control circuit diagram.
+
+There are also some special treatment products are all behind the plastic shell, 
+some main filter capacitors on the circuit board are lost, some sockets are loose, 
+but the motor is good, the power-on function is normal. 
+
+The following is the dimension drawing diagram and actual disassembly diagram of the motor.
+
+Note that the brushless motor can not be connected positively and negatively.
+
+ If the fault is connected, the drive circuit must be burned. 
+
+The voltage test is safe within 15v, preferably at 12v. A regulated pow

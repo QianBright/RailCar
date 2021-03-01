@@ -259,8 +259,10 @@ boolean WiFiManager::autoConnect(char const *apName, char const *apPassword) {
     _begin();
 
     // attempt to connect using saved settings, on fail fallback to AP config portal
+	//尝试使用保存的设置连接，如果失败，回退到AP配置门户
     if(!WiFi.enableSTA(true)){
       // handle failure mode Brownout detector etc.
+	  //处理失效模式停电检测器等
       DEBUG_WM(DEBUG_ERROR,"[FATAL] Unable to enable wifi!");
       return false;
     }
