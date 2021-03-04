@@ -1,6 +1,8 @@
 #include <Arduino.h>
 
 #include <WiFi.h>
+#include <WiFiManager.h>
+
 #include <PubSubClient.h>
 
 #include <ArduinoJson.h>
@@ -50,6 +52,7 @@ PubSubClient client(CClient);
 // 制动
 void bBreak()
 {
+
   actualSpeed = 0;
   expectSpeed = 0;
 }
@@ -124,7 +127,7 @@ void mqttConnect()
 // PUSH
 void mqttIntervalPost(int LIGHT, int MOVE, int BBREAK, int SPEED)
 {
-  DynamicJsonDocument PUSHdoc(512);
+  DynamicJsonDocument PUSHdoc(256);
   deserializeJson(PUSHdoc, ALINK_BODY_FORMAT); //从ALINK_BODY_FORMAT解码成DynamicJsonDocument
   JsonObject root = PUSHdoc.as<JsonObject>();  //从doc对象转换成的JsonObject类型对象
   JsonObject params = root["params"];
@@ -156,7 +159,7 @@ void callback(char *topic, byte *payload, unsigned int length)
   Serial.print("Topic: ");
   Serial.println(topic);
 
-  DynamicJsonDocument RECVdoc(512);
+  DynamicJsonDocument RECVdoc(256);
   deserializeJson(RECVdoc, payload, length);
   // 显示接收到的信息
   Serial.println("消息内容: ");
@@ -226,10 +229,6 @@ void loop()
   {
     lastMs = millis();
     mqttIntervalPost(digitalRead(ledPin), move, bbreak, actualSpeed); // 发布
-    Serial.println(light);
-    Serial.println(move);
-    Serial.println(bbreak);
-    Serial.println(expectSpeed);
   }
   //led_wifi
   digitalWrite(ledPin, light);
