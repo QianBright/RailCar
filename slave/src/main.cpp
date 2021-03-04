@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 #include <WiFi.h>
-#include <WiFiManager.h>
+// #include <WiFiManager.h>
 
 #include <PubSubClient.h>
 
@@ -149,6 +149,8 @@ void mqttIntervalPost(int LIGHT, int MOVE, int BBREAK, int SPEED)
   client.publish(ALINK_TOPIC_PROP_POST, jsonBuffer, n);
   // PUSHdoc.clear();
   Serial.println("-----------PUSH END------------");
+  Serial.println();
+  Serial.println();
 }
 
 // RECV
@@ -192,6 +194,8 @@ void callback(char *topic, byte *payload, unsigned int length)
 
   // RECVdoc.clear();
   Serial.println("-----------RECV END------------");
+  Serial.println();
+  Serial.println();
   mqttIntervalPost(digitalRead(ledPin), move, bbreak, actualSpeed);
 }
 
