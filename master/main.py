@@ -1,16 +1,16 @@
-# This is a sample Python script.
+from linkkit import linkkit
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+lk = linkkit.LinkKit(
+    host_name="cn-shanghai",
+    product_key="xxxxxxxxxxx",
+    device_name="nnnnnnnn",
+    device_secret="",
+    product_secret="yyyyyyyyyyyyyyyy")
+lk.on_device_dynamic_register = on_device_dynamic_register
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+def on_device_dynamic_register(rc, value, userdata):
+    if rc == 0:
+        print("dynamic register device success, rc:%d, value:%s" % (rc, value))
+    else:
+        print("dynamic register device fail,rc:%d, value:%s" % (rc, value))
