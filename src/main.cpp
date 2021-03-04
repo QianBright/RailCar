@@ -47,6 +47,39 @@ int expectSpeed = 0; // 期望速度
 WiFiClient CClient;
 PubSubClient client(CClient);
 
+// 制动
+void bBreak()
+{
+  actualSpeed = 0;
+  expectSpeed = 0;
+}
+
+// 加减速度
+int speedchange(uint8_t pin, uint32_t START, uint32_t END, uint32_t TIME)
+{
+  // 将变量val数值从0~100区间映射到1000~0区间
+  START = map(START, 0, 100, 1000, 0);
+  END = map(END, 0, 100, 1000, 0);
+  int delayTime = floor(TIME / 1000);
+
+  while (START != END)
+  {
+    analogWrite(pwmPin, START, 1000);
+    delay(delayTime);
+    if (START < END)
+    {
+      START++;
+    }
+    else
+    {
+      START--;
+    }
+  }
+  analogWrite(pwmPin, START, 1000);
+
+  return map(START, 1000, 0, 0, 100);
+}
+
 // Wifi连接模块
 void wifiInit()
 {
@@ -134,41 +167,29 @@ void callback(char *topic, byte *payload, unsigned int length)
   JsonObject root = RECVdoc.as<JsonObject>(); //从doc对象转换成的JsonObject类型对象
   JsonObject params = root["params"];
   // 接受到的变量/值在此添加
-  light = params.getMember("light");
-  // move = params.getMember("move");
-  // bbreak = params.getMember("bbreak");
-  expectSpeed = params.getMember("speed");
-  // 得想个办法是的传回参数未NULL时变量保持原来的不变
+  if (!params["light"].isNull())
+  {
+    light = params.getMember("light");
+  }
+
+  if (!params["move"].isNull())
+  {
+    move = params.getMember("move");
+    actualSpeed = speedchange(pwmPin, actualSpeed, 0, 5000);
+  }
+  if (!params["bbreak"].isNull())
+  {
+    bbreak = params.getMember("bbreak");
+    bBreak();
+  }
+  if (!params["speed"].isNull())
+  {
+    expectSpeed = params.getMember("speed");
+  }
 
   // RECVdoc.clear();
   Serial.println("-----------RECV END------------");
   mqttIntervalPost(digitalRead(ledPin), move, bbreak, actualSpeed);
-}
-
-// 速度
-int speedchange(uint8_t pin, uint32_t START, uint32_t END, uint32_t TIME)
-{
-  // 将变量val数值从0~100区间映射到1000~0区间
-  START = map(START, 0, 100, 1000, 0);
-  END = map(END, 0, 100, 1000, 0);
-  int delayTime = floor(TIME / 1000);
-
-  while (START != END)
-  {
-    analogWrite(pwmPin, START, 1000);
-    delay(delayTime);
-    if (START < END)
-    {
-      START++;
-    }
-    else
-    {
-      START--;
-    }
-  }
-  analogWrite(pwmPin, START, 1000);
-
-  return map(START, 1000, 0, 0, 100);
 }
 
 void setup()
