@@ -69,6 +69,7 @@ int speedchange(uint8_t pin, uint32_t START, uint32_t END, uint32_t TIME)
   {
     analogWrite(pwmPin, START, 1000);
     delay(delayTime);
+    client.loop(); // 希望采用多任务来解决它
     if (START < END)
     {
       START++;
