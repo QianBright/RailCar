@@ -4,6 +4,7 @@
 // #include <WiFiManager.h>
 
 #include <PubSubClient.h>
+#include <AliyunIoTSDK.h>
 
 #include <ArduinoJson.h>
 #include <analogWrite.h>
@@ -11,6 +12,8 @@
 // 引脚设置
 #define KEY_IO0 0
 #define ledPin 12
+#define ledWifiPin 32
+#define ledMqttPin 33
 #define breakPin 18    // yellow
 #define pwmPin 19      // white
 #define reversalPin 21 // green
@@ -25,14 +28,6 @@
 #define DEVICE_SECRET "155f22f3f7b3cea7a9c3d61b9e59b82b"
 #define REGION_ID "cn-shanghai"
 
-#define CLIENT_ID "123|securemode=3,signmethod=hmacsha1,timestamp=789|"
-#define MQTT_PASSWD "9389b234f5435b0f8b031d7f6403ddc73a73e758"
-
-// 线上环境域名和端口号，不需要改
-#define MQTT_SERVER PRODUCT_KEY ".iot-as-mqtt." REGION_ID ".aliyuncs.com"
-#define MQTT_PORT 1883
-#define MQTT_USRNAME DEVICE_NAME "&" PRODUCT_KEY
-
 #define ALINK_TOPIC_PROP_POST "/sys/" PRODUCT_KEY "/" DEVICE_NAME "/thing/event/property/post"
 #define ALINK_TOPIC_PROP_SET "/sys/" PRODUCT_KEY "/" DEVICE_NAME "/thing/event/property/set"
 
@@ -40,57 +35,17 @@
 
 unsigned long lastMs = 0;
 // 为会接收到的变量设置全局变量并赋初始值
-bool light = 0;
-bool move = 1;       // 默认前进  // 正转
-bool bbreak = 1;     // 急停状态
-int actualSpeed = 0; // 实际速度
-int expectSpeed = 0; // 期望速度
+int light = 0;
 
-WiFiClient CClient;
-PubSubClient client(CClient);
-
-// 制动
-void bBreak()
-{
-
-  actualSpeed = 0;
-  expectSpeed = 0;
-}
-
-// 加减速度
-int speedchange(uint8_t pin, uint32_t START, uint32_t END, uint32_t TIME)
-{
-  // 将变量val数值从0~100区间映射到1000~0区间
-  START = map(START, 0, 100, 1000, 0);
-  END = map(END, 0, 100, 1000, 0);
-  int delayTime = floor(TIME / 1000);
-
-  while (START != END)
-  {
-    analogWrite(pwmPin, START, 1000);
-    delay(delayTime);
-    client.loop(); // 希望采用多任务来解决它
-    if (START < END)
-    {
-      START++;
-    }
-    else
-    {
-      START--;
-    }
-  }
-  analogWrite(pwmPin, START, 1000);
-
-  return map(START, 1000, 0, 0, 100);
-}
+static WiFiClient CClient;
 
 // Wifi连接模块
-void wifiInit()
+void wifiInit(const char *SSID, const char *PASSWORD)
 {
   WiFi.mode(WIFI_AP_STA);
   // WiFi.softAP("eDray", "12345678");
   Serial.print("WiFi连接中..");
-  WiFi.begin(WIFI_SSID, WIFI_PASSWD);
+  WiFi.begin(SSID, PASSWORD);
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(1000);
@@ -102,145 +57,72 @@ void wifiInit()
   Serial.println(WiFi.localIP());
   Serial.print("MAC 地址: ");
   Serial.println(WiFi.macAddress());
+  digitalWrite(ledWifiPin, 1);
 }
 
-// 检查与服务器的连接状态 // 断开重连
-void mqttConnect()
+// 电源属性修改的回调函数
+void lightCallback(JsonVariant p)
 {
-  while (!client.connected())
+  int light = p["light"];
+  if (light == 1)
   {
-    Serial.println("MQTT服务器连接中...");
-    if (client.connect(CLIENT_ID, MQTT_USRNAME, MQTT_PASSWD))
-    {
-      Serial.println("MQTT连接成功!");
-      // 连接成功时订阅主题
-      client.subscribe(ALINK_TOPIC_PROP_SET); // 订阅
-    }
-    else
-    {
-      Serial.print("MQTT Connect err:");
-      Serial.println(client.state());
-      delay(2000);
-    }
+    // 启动设备
+    Serial.println("开灯");
   }
+  else
+  {
+    Serial.println("关灯");
+  }
+
+  digitalWrite(ledPin, light);
 }
 
-// PUSH
-void mqttIntervalPost(int LIGHT, int MOVE, int BBREAK, int SPEED)
+void speedCallback(JsonVariant p)
 {
-  DynamicJsonDocument PUSHdoc(256);
-  deserializeJson(PUSHdoc, ALINK_BODY_FORMAT); //从ALINK_BODY_FORMAT解码成DynamicJsonDocument
-  JsonObject root = PUSHdoc.as<JsonObject>();  //从doc对象转换成的JsonObject类型对象
-  JsonObject params = root["params"];
-  //需要上传的变量/值在此添加
-  params["light"] = LIGHT;
-  params["move"] = MOVE;
-  params["bbreak"] = BBREAK;
-  params["speed"] = SPEED;
-
-  Serial.println("-----------PUSH MESSAGE------------");
-  Serial.println("消息内容: ");
-  serializeJsonPretty(PUSHdoc, Serial); // 串口美化打印json
-  Serial.println();
-
-  Serial.printf("JsonDocument已使用内存 %d Byte\n", PUSHdoc.memoryUsage());
-
-  char jsonBuffer[256];
-  size_t n = serializeJson(PUSHdoc, jsonBuffer);
-  client.publish(ALINK_TOPIC_PROP_POST, jsonBuffer, n);
-  // PUSHdoc.clear();
-  Serial.println("-----------PUSH END------------");
-  Serial.println();
-  Serial.println();
-}
-
-// RECV
-// 首先打印主题名称, 然后打印收到的消息的每个字节
-void callback(char *topic, byte *payload, unsigned int length)
-{
-  Serial.println("-----------RECV MESSAGE------------");
-  Serial.print("Topic: ");
-  Serial.println(topic);
-
-  DynamicJsonDocument RECVdoc(256);
-  deserializeJson(RECVdoc, payload, length);
-  // 显示接收到的信息
-  Serial.println("消息内容: ");
-  serializeJsonPretty(RECVdoc, Serial); // 串口美化打印json
-  Serial.println();
-  Serial.printf("JsonDocument已使用内存 %d Byte\n", RECVdoc.memoryUsage());
-
-  JsonObject root = RECVdoc.as<JsonObject>(); //从doc对象转换成的JsonObject类型对象
-  JsonObject params = root["params"];
-  // 接受到的变量/值在此添加
-  if (!params["light"].isNull())
-  {
-    light = params.getMember("light");
-  }
-
-  if (!params["move"].isNull())
-  {
-    move = params.getMember("move");
-    actualSpeed = speedchange(pwmPin, actualSpeed, 0, 5000);
-  }
-  if (!params["bbreak"].isNull())
-  {
-    bbreak = params.getMember("bbreak");
-    bBreak();
-  }
-  if (!params["speed"].isNull())
-  {
-    expectSpeed = params.getMember("speed");
-  }
-
-  // RECVdoc.clear();
-  Serial.println("-----------RECV END------------");
-  Serial.println();
-  Serial.println();
-  mqttIntervalPost(digitalRead(ledPin), move, bbreak, actualSpeed);
+  int speed = p["speed"];
+  Serial.println(speed);
 }
 
 void setup()
 {
   Serial.begin(115200);
+  Serial.println();
+  Serial.println();
+  Serial.println("///////////Start///////////");
+  delay(20);
+
   pinMode(KEY_IO0, INPUT_PULLUP);
   pinMode(ledPin, OUTPUT);
+  pinMode(ledWifiPin, OUTPUT);
+  pinMode(ledMqttPin, OUTPUT);
 
   pinMode(breakPin, OUTPUT);
   pinMode(pwmPin, OUTPUT);
   pinMode(reversalPin, OUTPUT);
 
-  Serial.println();
-  Serial.println();
-  Serial.println("///////////Start///////////");
+  // 初始化 wifi
+  wifiInit(WIFI_SSID, WIFI_PASSWD);
 
-  wifiInit(); // 连接WIFI
+  // 初始化 iot，需传入 wifi 的 client，和设备产品信息
+  AliyunIoTSDK::begin(CClient, PRODUCT_KEY, DEVICE_NAME, DEVICE_SECRET, REGION_ID);
+  digitalWrite(ledMqttPin, 1);
 
-  // 连接MQTT服务器
-  client.setServer(MQTT_SERVER, MQTT_PORT);
-  client.setCallback(callback); //接受消息
-  mqttConnect();
+  // 绑定一个设备属性回调，当远程修改此属性，会触发 powerCallback
+  // PowerSwitch 是在设备产品中定义的物联网模型的 id
+  AliyunIoTSDK::bindData("light", lightCallback);
+  AliyunIoTSDK::bindData("speed", speedCallback);
+
+  // 发送一个数据到云平台，LightLuminance 是在设备产品中定义的物联网模型的 id
+  AliyunIoTSDK::send("light", digitalRead(KEY_IO0));
+  AliyunIoTSDK::send("speed", 0);
 }
 
 void loop()
 {
-  // 重连
-  if (!client.connected())
+  AliyunIoTSDK::loop();
+  if (!CClient.connected())
   {
-    mqttConnect();
+    digitalWrite(ledWifiPin, 0);
+    digitalWrite(ledMqttPin, 0);
   }
-  // 5秒上传一次,长传当前状态
-  if (millis() - lastMs >= 5000)
-  {
-    lastMs = millis();
-    mqttIntervalPost(digitalRead(ledPin), move, bbreak, actualSpeed); // 发布
-  }
-  //led_wifi
-  digitalWrite(ledPin, light);
-  digitalWrite(reversalPin, move);
-  digitalWrite(breakPin, bbreak);
-
-  // 实际速度按照线性接近期望速度，最终实际速度=期望速度
-  actualSpeed = speedchange(pwmPin, actualSpeed, expectSpeed, 10000);
-  client.loop();
 }
