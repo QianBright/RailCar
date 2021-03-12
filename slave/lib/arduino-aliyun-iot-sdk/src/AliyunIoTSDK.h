@@ -15,7 +15,7 @@ typedef struct poniter_desc
 
 // 最多绑定20个回调
 static poniter_desc poniter_array[20];
-static p_poniter_desc p_poniter_array;
+// static p_poniter_desc p_poniter_array;
 //----------------------------------
 
 class AliyunIoTSDK
@@ -28,10 +28,9 @@ private:
   static char domain[150];
 
   // 定时检查 mqtt 链接
-  static void mqttCheckConnect();
-
+  static int mqttCheckConnect();
   static void messageBufferCheck();
-  static void sendBuffer();
+  // static void sendBuffer();
 
 public:
   // 标记一些 topic 模板
