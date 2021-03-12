@@ -142,7 +142,7 @@ int AliyunIoTSDK::mqttCheckConnect()
         {
             Serial.print("MQTT Connect err:");
             Serial.println(client->state());
-            delay(2000);
+            delayMicroseconds(2000000);
             return 0;
         }
     }

@@ -70,7 +70,7 @@ int speedchange(uint8_t pin, uint32_t START, uint32_t END, uint32_t TIME)
   {
     int a = map(START, 1000, 0, 0, 100);
     analogWrite(pwmPin, START, 1000);
-    delay(delayTime);
+    delayMicroseconds(uint32_t(delayTime * 1000));
     // AliyunIoTSDK::loop(); // 希望采用多任务来解决它
     AliyunIoTSDK::send("speed", a);
     if (START < END)
@@ -203,11 +203,12 @@ void setup()
 void loop()
 {
   AliyunIoTSDK::loop();
+  digitalWrite(breakPin, bbreak);
+  digitalWrite(reversalPin, move);
   if (!CClient.connected())
   {
     digitalWrite(ledWifiPin, 0);
     digitalWrite(ledMqttPin, 0);
   }
-  digitalWrite(breakPin, bbreak); //电机运行前必须运行它
   actualSpeed = speedchange(pwmPin, actualSpeed, expectSpeed, 10000);
 }
