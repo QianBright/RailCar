@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <FreeRTOS.h>
 
 #include <WiFi.h>
 // #include <WiFiManager.h>
@@ -33,6 +34,7 @@ bool light = 0;
 bool move = 1;            // 默认前进  // 正转
 bool bbreak = 1;          // 急停状态
 uint16_t actualSpeed = 0; // 实际速度
+uint16_t a = 0;
 uint16_t expectSpeed = 0; // 期望速度
 
 static WiFiClient CClient;
@@ -58,33 +60,33 @@ void wifiInit(const char *SSID, const char *PASSWORD)
   digitalWrite(ledWifiPin, 1);
 }
 
-// 加减速度
-int speedchange(uint8_t pin, uint32_t START, uint32_t END, uint32_t TIME)
-{
-  // 将变量val数值从0~100区间映射到1000~0区间
-  START = map(START, 0, 100, 1000, 0);
-  END = map(END, 0, 100, 1000, 0);
-  int delayTime = floor(TIME / 1000);
+// // 加减速度
+// int speedchange(uint8_t pin, uint32_t START, uint32_t END, uint32_t TIME)
+// {
+//   // 将变量val数值从0~100区间映射到1000~0区间
+//   START = map(START, 0, 100, 1000, 0);
+//   END = map(END, 0, 100, 1000, 0);
+//   int delayTime = floor(TIME / 1000);
 
-  while (START != END)
-  {
-    int a = map(START, 1000, 0, 0, 100);
-    analogWrite(pwmPin, START, 1000);
-    delayMicroseconds(uint32_t(delayTime * 1000));
-    // AliyunIoTSDK::loop(); // 希望采用多任务来解决它
-    AliyunIoTSDK::send("speed", a);
-    if (START < END)
-    {
-      START++;
-    }
-    else
-    {
-      START--;
-    }
-  }
-  analogWrite(pwmPin, START, 1000);
-  return map(START, 1000, 0, 0, 100);
-}
+//   while (START != END)
+//   {
+//     int a = map(START, 1000, 0, 0, 100);
+//     analogWrite(pwmPin, START, 1000);
+//     delayMicroseconds(uint32_t(delayTime * 1000));
+//     // AliyunIoTSDK::loop(); // 希望采用多任务来解决它
+//     AliyunIoTSDK::send("speed", a);
+//     if (START < END)
+//     {
+//       START++;
+//     }
+//     else
+//     {
+//       START--;
+//     }
+//   }
+//   analogWrite(pwmPin, START, 1000);
+//   return map(START, 1000, 0, 0, 100);
+// }
 
 // light
 void lightCallback(JsonVariant p)
@@ -129,9 +131,10 @@ void moveCallback(JsonVariant p)
     {
       Serial.println("后退");
     }
-    actualSpeed = speedchange(pwmPin, actualSpeed, 0, 5000);
-    AliyunIoTSDK::send("move", move);
-    digitalWrite(reversalPin, move);
+    // actualSpeed = speedchange(pwmPin, actualSpeed, 0, 5000);
+    a = expectSpeed;
+    expectSpeed = 0;
+    // AliyunIoTSDK::send("speed", actualSpeed);
   }
 }
 
@@ -155,10 +158,20 @@ void bbreakCallback(JsonVariant p)
     {
       actualSpeed = 0;
       expectSpeed = 0;
-      AliyunIoTSDK::send("speed", actualSpeed);
     }
+    AliyunIoTSDK::send("speed", actualSpeed);
   }
 }
+
+// void TaskMove(void *pvParameters)
+// {
+//   Serial.print("TaskLoop running on core: ");
+//   Serial.println(xPortGetCoreID());
+//   while (1)
+//   {
+//     actualSpeed = speedchange(pwmPin, actualSpeed, expectSpeed, 10000);
+//   }
+// }
 
 void setup()
 {
@@ -194,21 +207,43 @@ void setup()
   AliyunIoTSDK::bindData("bbreak", bbreakCallback);
 
   // 发送当前初始化状态
-  AliyunIoTSDK::send("light", light);
+  AliyunIoTSDK::send("light", digitalRead(ledPin));
   AliyunIoTSDK::send("speed", actualSpeed);
-  AliyunIoTSDK::send("move", move);
-  AliyunIoTSDK::send("bbreak", bbreak);
+  AliyunIoTSDK::send("move", digitalRead(reversalPin));
+  AliyunIoTSDK::send("bbreak", digitalRead(breakPin));
 }
 
 void loop()
 {
   AliyunIoTSDK::loop();
-  digitalWrite(breakPin, bbreak);
-  digitalWrite(reversalPin, move);
+  // digitalWrite(breakPin, bbreak);
+  // digitalWrite(reversalPin, move);
   if (!CClient.connected())
   {
     digitalWrite(ledWifiPin, 0);
     digitalWrite(ledMqttPin, 0);
   }
-  actualSpeed = speedchange(pwmPin, actualSpeed, expectSpeed, 10000);
+  // actualSpeed = speedchange(pwmPin, actualSpeed, expectSpeed, 10000);
+  if (actualSpeed != expectSpeed)
+  {
+    if (actualSpeed < expectSpeed)
+    {
+      actualSpeed++;
+    }
+    else
+    {
+      actualSpeed--;
+    }
+    analogWrite(pwmPin, map(actualSpeed, 0, 100, 1000, 0), 1000);
+    AliyunIoTSDK::send("speed", actualSpeed);
+    delayMicroseconds(5000);
+  }
+  analogWrite(pwmPin, map(actualSpeed, 0, 100, 1000, 0), 1000);
+
+  if (actualSpeed == 0 && move != digitalRead(reversalPin))
+  {
+    expectSpeed = a;
+    digitalWrite(reversalPin, move);
+    AliyunIoTSDK::send("move", move);
+  }
 }
