@@ -308,9 +308,9 @@ void AliyunIoTSDK::messageBufferCheck()
     }
     if (bufferSize > 0)
     {
-        Serial.print("bufferSize: ");
-        Serial.println(bufferSize);
-        showBuffer(); //看看发了些啥
+        // Serial.print("bufferSize: ");
+        // Serial.println(bufferSize);
+        // showBuffer(); //看看发了些啥
         sendBuffer(bufferSize);
     }
 }
@@ -377,8 +377,8 @@ void AliyunIoTSDK::send(const char *param)
     Serial.println();
     char jsonBuf[1024];
     sprintf(jsonBuf, ALINK_BODY_FORMAT, CLIENT_ID, param);
-    Serial.print("jsonBuf_len: ");
-    Serial.println(strlen(jsonBuf));
+    // Serial.print("jsonBuf_len: ");
+    // Serial.println(strlen(jsonBuf));
     boolean d = client->publish(ALINK_TOPIC_PROP_POST, jsonBuf, strlen(jsonBuf) - 1);
     if (1 == d)
     {
