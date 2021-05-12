@@ -13,20 +13,20 @@
 /**
  * 输出引脚
 */
-#define ledWifiPin 32
-#define ledMqttPin 33
+#define ledWifiPin 2
+#define ledMqttPin 4
 
-#define ledPin 12
-// #define breakPin 18    // yellow
-#define pwmPin 19      // white
-#define reversalPin 21 // green
+#define ledPin 5
+// #define breakPin 25    // yellow
+#define pwmPin 32      // white
+#define reversalPin 26 // green
 
 /**
  * 输入引脚
  * 仅两个脚支持模拟量输入
 */
 #define KEY_IO0 0
-#define speedPin 5
+#define speedPin 35
 
 // 连接WIFI账号和密码
 #define WIFI_SSID "Origincell"
@@ -47,6 +47,11 @@ uint16_t registerSpeed = 0; //正反转切换时暂存速度
 uint16_t expectSpeed = 0;   // 期望速度
 
 static WiFiClient CClient;
+// volatile long value = 0;
+// volatile unsigned long Time0; //当前时间
+// volatile unsigned long Time1; //第一次跳变的时间
+// volatile unsigned long Time2; //第二次跳变的时间
+// int m = 0;
 
 /**
  * Wifi连接模块
@@ -215,6 +220,20 @@ void bbreakCallback(JsonVariant p)
 //   }
 // }
 
+// void ccount()
+// { //中断执行程序
+//   Time0 = micros();
+//   if (m % 2 == 0)
+//   {
+//     Time1 = Time0;
+//   }
+//   else if (m > 0 & m % 2 == 1)
+//   {
+//     Time2 = Time0;
+//   }
+//   m++;
+// }
+
 /*******************************************
  * 配置
  *******************************************/
@@ -247,6 +266,8 @@ void setup()
   digitalWrite(ledMqttPin, 1);
   Serial.println();
 
+  // attachInterrupt(speedPin, ccount, FALLING);
+
   // 绑定一个设备属性回调，当远程修改此属性，会触发 powerCallback
   // PowerSwitch 是在设备产品中定义的物联网模型的 id
   AliyunIoTSDK::bindData("light", lightCallback);
@@ -264,12 +285,21 @@ void setup()
 /*******************************************
  * 循环
  *******************************************/
+
 void loop()
 {
+
   AliyunIoTSDK::loop();
   analogWrite(pwmPin, map(actualSpeed, 0, 100, 0, 1000), 1000);
 
-  Serial.println(pulseIn(speedPin, HIGH, 5000UL));
+  // Serial.println(pulseIn(speedPin, HIGH,1000000UL));
+  // Serial.println(duration);
+  // if (m > 0 & m % 2 == 0)
+  // {
+  //   value = 60 * 1000000 / (Time2 - Time1);
+  //   Serial.print("Heart Rate = ");
+  //   Serial.print(value);
+  // }
 
   if (!CClient.connected())
   {
